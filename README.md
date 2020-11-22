@@ -41,7 +41,9 @@ Parameter 수를 2M 안으로 조절하기 위해 LE-NET 구조를 채택하여 
             normalize,
         ])
 ```
+
 이때 Weight decay = 1e-4, lr = 0.001, lr sheduling step size = 100 으로 설정하였다. Val acc 수렴 결과는 아래와 같다.
+
 <img src="./img/2.2LE-NET.png" width="80%">
 
 #### Custom-Net
@@ -117,20 +119,25 @@ class Model(torch.nn.Module):
             out = module(out)
         return out
 ```
+
 Val acc 결과는 아래와 같다.
+
 <img src="./img/2.2_Custom.png" width="80%">
 
 
 #### Custom-NET with Leaky ReLU
 기존 Custom-NET의 활성함수를 ReLU에서 Leaky ReLU(Leaky ReLU의 음수 기울기는 0.1이다.)로 교체하였다. Val acc 결과는 아래와 같다.
+
 <img src="./img/2.2_LReLU.png" width="80%">
 
 #### Custom-NET with Scheduling epoch 50
 기존 Custom-NET의 lr Scheduling epoch을 100에서 50으로 감소시켜서 다시 실험을 진행하였다. Val acc 결과는 아래와 같다.
+
 <img src="./img/2.2_50.png" width="80%">
 
 ### ver_2.3
 Fixing the train-test resolution discrepancy 논문에 나온 기법을 사용하여 train과 test셋의 차이를 fix하여 실험해보았다. 이때 Train은 Random resized crop 을 80*80의 해상도로 진행하였고, 추가적으로 120*120의 해상도로 fine tune을 진행하였다. Val acc 결과는 아래와 같다.
+
 <img src="./img/2.3_2.png" width="80%">
 
 ### ver_2.4
