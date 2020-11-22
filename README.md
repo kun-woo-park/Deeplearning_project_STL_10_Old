@@ -342,5 +342,7 @@ def Model(pretrained: bool = False, progress: bool = True, **kwargs):
 
   
 ```
+
 Val acc 결과는 아래와 같다.
-<img src="./img/2.5.png" width="80%">
+
+<img src="./img/2.5_1.png" width="80%">
