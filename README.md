@@ -41,7 +41,7 @@ Parameter 수를 2M 안으로 조절하기 위해 LE-NET 구조를 채택하여 
             normalize,
         ])
 ```
-이때 Parameter 의 총 갯수는 1,565,706개이고, Weight decay = 1e-4, lr = 0.001, lr sheduling step size = 100 으로 설정하였다. Val acc 수렴 결과는 아래와 같다.
+이때 Weight decay = 1e-4, lr = 0.001, lr sheduling step size = 100 으로 설정하였다. Val acc 수렴 결과는 아래와 같다.
 <img src="./img/2.2LE-NET.png" width="80%">
 
 #### Custom-Net
@@ -338,7 +338,7 @@ def Model(pretrained: bool = False, progress: bool = True, **kwargs):
     
     kwargs['groups'] = 8
     kwargs['width_per_group'] = 4
-    return _resnext('resnext', Bottleneck, [3, 3, 3], pretrained, progress, **kwargs)
+    return _resnext('resnext', Bottleneck, [3, 6, 3], pretrained, progress, **kwargs)
 
   
 ```
