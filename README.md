@@ -1,150 +1,10 @@
 ## Deeplearning_project_STL_10
+본 Repo는 STL 10에 대한 학습을 위해 만들어졌다. 단순히 STL 10을 학습시키는게 아니라, train set은 class당 500개씩 총 5000개, total model parameter은 2M로 제한하여 학습시키는 것이 목표이다. 물론 외부 데이터나, 외부 trained model weight의 사용은 하지 않고, scratch 상태에서 model을 학습시키는 것이 목적이다. 최종 결과본은 [DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb](DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb)이다.
 
-### 구현 목적
+### Implementation and several tries
+Train set과 validation set간의 correlation을 줄이기 위해 주어진 dataset의 split을 먼저 진행하였다. [split_folder.ipynb](./split_folder.ipynb)코드를 통해 train set 4000개와 validation set 1000개로 나누어 두었다. 여러 실험을 진행 후에, ResNet구조를 기반으로 model의 구조를 완성시켰다. 구현된 model 구조는 다음과 같다.
 
-### ver_1.0
-
-### ver_1.1
-
-### ver_1.2
-
-### ver_1.3
-
-### ver_1.4
-
-### ver_1.5
-
-### ver_1.6
-
-### ver_1.7
-
-### ver_1.8
-
-### ver_1.9
-
-### ver_2.0
-
-### ver_2.1
-
-### ver_2.2
-#### LE-NET
-Parameter 수를 2M 안으로 조절하기 위해 LE-NET 구조를 채택하여 실험을 진행하였다. Augmented Data는 총 50000개로 진행하였고, Transform은 다음과 같이 설정하였다.
-``` python
-        transforms.Compose([
-        transforms.RandomRotation(degrees=45),
-            
-        transforms.RandomResizedCrop(96),
-        transforms.ColorJitter(.3,.3,.3,.3),
-        transforms.RandomHorizontalFlip(),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-        ])
-```
-
-이때 Weight decay = 1e-4, lr = 0.001, lr sheduling step size = 100 으로 설정하였다. Val acc 수렴 결과는 아래와 같다.
-
-<img src="./img/2.2LE-NET.png" width="80%">
-
-#### Custom-Net
-LE-NET보다 높은 성능을 내기 위해 Model을 아래와 같이 수정하였다. 또한 Augmented Data 역시 총 100000개의 데이터로 늘렸다. 이외의 파라메터는 LE-NET
-```python
-class Model(torch.nn.Module):
-    def __init__(self):
-        super(Model, self).__init__()
-        self.layer_1 = nn.Conv2d(in_channels=3,out_channels=64,kernel_size=5,
-                                 stride=2,padding=3)
-        self.act_1 = nn.ReLU()
-        self.conv2_bn1 = nn.BatchNorm2d(64)
-        self.max_1=nn.MaxPool2d(2,2)
-        
-        self.layer_2 = nn.Conv2d(in_channels=64,out_channels=128,kernel_size=4,
-                                 stride=1,padding=2)
-        self.act_2 = nn.ReLU()
-        self.conv2_bn2 = nn.BatchNorm2d(128)
-        
-        self.layer_3 = nn.Conv2d(in_channels=128,out_channels=128,kernel_size=4,
-                                 stride=1,padding=2)
-        self.act_3 = nn.ReLU()
-        self.conv2_bn3 = nn.BatchNorm2d(128)
-        
-        self.layer_4 = nn.Conv2d(in_channels=128,out_channels=128,kernel_size=1,
-                                 stride=1)
-        self.act_4 = nn.ReLU()
-        self.conv2_bn4 = nn.BatchNorm2d(128)
-        
-        self.max_1=nn.MaxPool2d(2,2)
-        
-        self.layer_5 = nn.Conv2d(in_channels=128,out_channels=256,kernel_size=3,
-                                 stride=1,padding=2)
-        self.act_5 = nn.ReLU()
-        self.conv2_bn5 = nn.BatchNorm2d(256)
-        
-        self.layer_6 = nn.Conv2d(in_channels=256,out_channels=256,kernel_size=3,
-                                 stride=1,padding=2)
-        self.act_6 = nn.ReLU()
-        self.conv2_bn6 = nn.BatchNorm2d(256)
-        
-        self.layer_7 = nn.Conv2d(in_channels=256,out_channels=256,kernel_size=1,
-                                 stride=1)
-        self.act_7 = nn.ReLU()
-        self.conv2_bn7 = nn.BatchNorm2d(256)
-        
-        self.max_2=nn.MaxPool2d(2,2)
-        
-        self.layer_8 = nn.Conv2d(in_channels=256,out_channels=512,kernel_size=2,
-                                 stride=1,padding=2)
-        self.act_8 = nn.ReLU()
-        self.conv2_bn8 = nn.BatchNorm2d(512)
-        
-        
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        
-        self.fc_layer_1 = nn.Linear(512,10)
-        self.act_9 = nn.ReLU()
-        
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-        
-        
-
-    def forward(self, x):
-        out = self.layer_1(x)
-        out = self.act_1(out)
-        for module in list(self.modules())[2:-2]:
-            out = module(out)
-        out = torch.flatten(out,1)
-        for module in list(self.modules())[-2:]:
-            out = module(out)
-        return out
-```
-
-Val acc 결과는 아래와 같다.
-
-<img src="./img/2.2_Custom.png" width="80%">
-
-
-#### Custom-NET with Leaky ReLU
-기존 Custom-NET의 활성함수를 ReLU에서 Leaky ReLU(Leaky ReLU의 음수 기울기는 0.1이다.)로 교체하였다. Val acc 결과는 아래와 같다.
-
-<img src="./img/2.2_LReLU.png" width="80%">
-
-#### Custom-NET with Scheduling epoch 50
-기존 Custom-NET의 lr Scheduling epoch을 100에서 50으로 감소시켜서 다시 실험을 진행하였다. Val acc 결과는 아래와 같다.
-
-<img src="./img/2.2_50.png" width="80%">
-
-### ver_2.3
-Fixing the train-test resolution discrepancy 논문에 나온 기법을 사용하여 train과 test셋의 차이를 fix하여 실험해보았다. 이때 Train은 Random resized crop 을 80*80의 해상도로 진행하였고, 추가적으로 120*120의 해상도로 fine tune을 진행하였다. Val acc 결과는 아래와 같다.
-
-<img src="./img/2.3_2.png" width="80%">
-
-### ver_2.4
-기존 Custom-NET의 batch size를 128에서 256으로 늘렸다. 이에 따라 fine tune을 하는데 더 도움이 될 것이라 예상한다. Val acc 결과는 아래와 같다.
-
-### ver_2.5
-사용 Model을 RESNET 형식으로 교체하였다. 구현한 Model은 아래와 같다. 
+#### Custom ResNet model
 ```python
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -187,7 +47,7 @@ class Bottleneck(nn.Module):
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion)
         self.bn3 = norm_layer(planes * self.expansion)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.LeakyReLU(0.1)
         self.downsample = downsample
         self.stride = stride
 
@@ -212,7 +72,6 @@ class Bottleneck(nn.Module):
         out = self.relu(out)
 
         return out
-
 
 class ResNet(nn.Module):
 
@@ -243,24 +102,25 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=4, stride=1,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+        self.relu = nn.LeakyReLU(0.1)
+        
+        self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.layer1 = self._make_layer(block, 30, layers[0])
+        self.layer2 = self._make_layer(block, 60, layers[1], stride=2,
                                        dilate=replace_stride_with_dilation[0])
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+        self.layer3 = self._make_layer(block, 96, layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
         
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(256 * block.expansion, num_classes)
+        self.fc = nn.Linear(96 * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -334,22 +194,72 @@ def _resnet(
         model.load_state_dict(state_dict)
     return model
 
-def _resnext(arch, block, layers, pretrained, progress, **kwargs):
-    model = ResNet(block, layers, **kwargs)
-    if pretrained:
-        state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
-        model.load_state_dict(state_dict)
-    return model
-
 def Model(pretrained: bool = False, progress: bool = True, **kwargs):
     
-    kwargs['groups'] = 8
-    kwargs['width_per_group'] = 4
-    return _resnext('resnext', Bottleneck, [3, 6, 3], pretrained, progress, **kwargs)
+    kwargs['groups'] = 1
+    kwargs['width_per_group'] = 64
+    return _resnet('resnet', Bottleneck, [4, 9, 8], pretrained, progress, **kwargs)
+    
+```
+여기에 다양한 기법을 활용하여 학습 성능을 높였다. 사용된 기법들은 data augmentation, label smoothing, learning rate scheduling, fix train-test resolution discrepancy 들이 있다.
 
-  
+#### Data augmentation
+Train set이 총 5000개로 많지 않은 숫자였기 때문에, data augmentation을 통해 총 10만개의 data로 data 양을 늘렸다. 사용된 augmentation은 다음과 같다.
+
+##### Augmentation code for train
+```python
+transforms.Compose([
+        transforms.RandomRotation(degrees=45),
+            
+        transforms.RandomResizedCrop(70),
+        transforms.ColorJitter(.3,.3,.3,.3),
+        transforms.RandomHorizontalFlip(),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ])
+```
+##### Augmentation code for fine tuning
+```python
+transforms.Compose([
+        transforms.RandomRotation(degrees=45),
+            
+        transforms.RandomResizedCrop(120),
+        transforms.ColorJitter(.3,.3,.3,.3),
+        transforms.RandomHorizontalFlip(),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ])
 ```
 
-Val acc 결과는 아래와 같다.
+#### Label smoothing
+Criterion을 label smoothing을 적용한 CrossEntropyLoss를 사용해 보았으나, 성능 향상이 거의 없어 최종 실험에서는 적용을 제외했다. 구현된 코드는 다음과 같다.
+##### Code for label smoothing loss
+```python
+class LabelSmoothingLoss(nn.Module):
+    def __init__(self, classes, smoothing=0.1, dim=-1):
+        super(LabelSmoothingLoss, self).__init__()
+        self.confidence = 1.0 - smoothing
+        self.smoothing = smoothing
+        self.cls = classes
+        self.dim = dim
+    def forward(self, pred, target):
+        pred = pred.log_softmax(dim=self.dim)
+        with torch.no_grad():
+            true_dist = torch.zeros_like(pred)
+            true_dist.fill_(self.smoothing / (self.cls - 1))
+            true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
+        return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
+```
+#### Learning rate scheduling
+여러 learning rate sheduler을 사용해 보았지만, cosine annealing scheduler가 가장 이상적이었다. 추가적인 수정을 통해 cosine annealing(warm restart) 이 update되는 step마다 최대값이 감소하도록 다시 구현하였다. 구현된 learning rate scheduling은 아래와 같다.
+##### Overview of learning rate scheduling
+img
 
-<img src="./img/2.5_1.png" width="80%">
+#### Fix train-test resolution discrepancy
+이 기법은 https://arxiv.org/pdf/1906.06423.pdf 논문을 토대로 적용하였다. 단순하게 train시에 augmented 되면서 잘려 있던 이미지의 해상도를 낮추고(crop되어 augmented될 때 물체의 사이즈가 커지지 않고 유지시키기 위해) test시에는 해상도를 높여서 train시의 물체와 test시의 물체가 비슷한 해상도(비슷한 크기로)로 보이도록 하는 것이다. Data augmentation에서도 확인할 수 있듯, 이를 위해 train시에는 70으로 resize하여 300 epochs를 학습하였고, test시를 위해 120으로 resize하여 추가적으로 140 epochs을 학습하였다(fine tuning).
+
+### Result
+최종 결과에 대한 validation accuracy의 그래프는 아래와 같다. x축은 epoch 수이고, y축은 validation accuracy이다.
+img
