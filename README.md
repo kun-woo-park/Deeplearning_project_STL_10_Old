@@ -256,6 +256,6 @@ class LabelSmoothingLoss(nn.Module):
 이 기법은 https://arxiv.org/pdf/1906.06423.pdf 논문을 토대로 적용하였다. 단순하게 train시에 augmented 되면서 잘려 있던 이미지의 해상도를 낮추고(crop되어 augmented될 때 물체의 사이즈가 커지지 않고 유지시키기 위해) test시에는 해상도를 높여서 train시의 물체와 test시의 물체가 비슷한 해상도(비슷한 크기로)로 보이도록 하는 것이다. Data augmentation에서도 확인할 수 있듯, 이를 위해 train시에는 70으로 resize하여 300 epochs를 학습하였고, test시를 위해 120으로 resize하여 추가적으로 140 epochs을 학습하였다(fine tuning).
 
 ### Result
-최종 결과에 대한 validation accuracy의 그래프는 아래와 같다. x축은 epoch 수이고, y축은 validation accuracy이다.
+최종 결과에 대한 validation accuracy의 그래프는 아래와 같다. x축은 epoch 수이고, y축은 validation accuracy이다. 최종적으로 2M의 제한 이내에서 84%의 정확도까지 개선하였다.
 ##### Result of validation accuracy
 <img src="./img/loss.png" width="80%">
