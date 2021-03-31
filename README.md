@@ -1,5 +1,5 @@
 ## Deeplearning_project_STL_10
-본 Repo는 STL 10에 대한 학습을 위해 만들어졌다. 단순히 STL 10을 학습시키는게 아니라, train set은 class당 500개씩 총 5000개, total model parameter은 2M로 제한하여 학습시키는 것이 목표이다. 물론 외부 데이터나, 외부 trained model weight의 사용은 하지 않고, scratch 상태에서 model을 학습시키는 것이 목적이다. 최종 결과본은 [DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb](DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb)이다.
+본 Repo는 STL 10에 대한 학습을 위해 만들어졌다. 단순히 STL 10을 학습시키는게 아니라, train set은 class당 500개씩 총 5000개, total model parameter은 2M로 제한하여 학습시키는 것이 목표이다. 물론 외부 데이터나, 외부 trained model weight의 사용은 하지 않고, scratch 상태에서 model을 학습시키는 것이 목적이다. 최종 결과본은 [DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb](DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb)이다. 정리된 내용은 [Deeplearning_project_STL_10](https://github.com/kun-woo-park/Deeplearning_project_STL_10)에서 확인할 수 있다.
 
 ### Implementation and several tries
 Train set과 validation set간의 correlation을 줄이기 위해 주어진 dataset의 split을 먼저 진행하였다. [split_folder.ipynb](./split_folder.ipynb)코드를 통해 train set 4000개와 validation set 1000개로 나누어 두었다. 여러 실험을 진행 후에, ResNet구조를 기반으로 model의 구조를 완성시켰다. 구현된 model 구조는 다음과 같다.
