@@ -1,4 +1,4 @@
-## Deeplearning_project_STL_10
+## Deeplearning_project_STL_10_Old
 본 Repo는 STL 10에 대한 학습을 위해 만들어졌다. 단순히 STL 10을 학습시키는게 아니라, train set은 class당 500개씩 총 5000개, total model parameter은 2M로 제한하여 학습시키는 것이 목표이다. 물론 외부 데이터나, 외부 trained model weight의 사용은 하지 않고, scratch 상태에서 model을 학습시키는 것이 목적이다. 최종 결과본은 [DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb](DL_Project_ver_3.0_Custom_RESNET_Cos_annealing_step_reduce.ipynb)이다. 정리된 내용은 [Deeplearning_project_STL_10](https://github.com/kun-woo-park/Deeplearning_project_STL_10)에서 확인할 수 있다.
 
 ### Implementation and several tries
@@ -205,11 +205,10 @@ Train set이 총 5000개로 많지 않은 숫자였기 때문에, data augmentat
 ```python
 transforms.Compose([
         transforms.RandomRotation(degrees=45),
-            
         transforms.RandomResizedCrop(70),
         transforms.ColorJitter(.3,.3,.3,.3),
         transforms.RandomHorizontalFlip(),
-            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
             transforms.ToTensor(),
             normalize,
         ])
@@ -218,11 +217,10 @@ transforms.Compose([
 ```python
 transforms.Compose([
         transforms.RandomRotation(degrees=45),
-            
         transforms.RandomResizedCrop(120),
         transforms.ColorJitter(.3,.3,.3,.3),
         transforms.RandomHorizontalFlip(),
-            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
             transforms.ToTensor(),
             normalize,
         ])
